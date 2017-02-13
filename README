@@ -1,0 +1,51 @@
+			Task 1:
+
+		structs.h:
+
+	Include bibliotecile, structurile si antetul functiilor necesare pentru implementare.
+Am folosit un graf reprezentat prin liste de adiacenta pentru a stoca tranzitiile, deoarece am considerat ca este cea mai eficienta metoda de a stoca si accesa rapid datele, fara a face o risipa prea mare de memorie. Graful contine numarul de stari si un vector de liste de adiacenta. Un element dintr-o lista are toate datele necesare pentru a efectua o tranzitie: stare cureta, un int pentru a decide daca este finala sau nu, caracter curent, stare urmatoare, caracterul cu care se va inlocui cel actual, capul de citire si legatura cu celula urmatoare.
+
+		functii.c:
+
+	Fisierul contine functiile al caror antet a fost definit in structs.h:
+
+	1.StateGraph* AllocateGraph(int number);
+Creeaza un nou element de tip StateGraph, aloca memorie pentru acesta si pentru vectorul de liste, actualizeaza campul StateNumber cu numarul de stari si intoarce graful nou alocat.
+	
+	2.void InitiateGraph(StateGraph *graph, char *state, int i);
+Seteaza starea curenta dintr-o celula, iar restul campurilor sunt initializate cu null sau cu 0; Cu aceasta functie initializez primele elule din lista, deoarece pe acestea le folosesc doar pentru a stii starea curenta, corespunzatoare intrarii respective din vector.
+
+	3.char* InitiateTape(char * word);
+Creeaza un nou sir de caractere, care va reprezenta banda. Aloca memorie (maximul posibil pentru banda), copiaza cuvantul citit ca input pe banda, iar in rest completeaza cu #.
+
+	4.void myFree(TCel *aux);
+Elibereaza campurile alocate dinamic din structura pentru tranzitii.
+
+	5.void DestroyGraph(StateGraph **graph)
+Dezaloca memoria ocupata de graf.
+
+	6.int RunTape(char* tape, char* head, char* state, StateGraph* graph);
+Simuleaza functionalitatea masinii si returneaza 1 daca se termina executia, 0 daca se agata. Caut in graf intrarea corespunzatoare starii in care ma aflu (data ca parametru) din vectorul de liste. Cand se gaseste, verific daca am ajuns intr-o stare finala si se retuneaza 1 in caz pozitiv. Altfel, parcurg lista pana gasesc caracterul curent (indicat de un pointer ce reprezinta capul de citire), sau pana ajung la capat. Daca nu s-a gasit caracterul curent pe banda, inseamna ca nu este definita tranzitia cautata, deci masina se agata, caz in care se returneaza 0.
+Daca s-a gasit si caracterul curent, atunci realizez actualizarile necesare: se schimba starea curenta, se rescrie caracterul curent cu cel indicat, se muta capul de citire si se repeta procesul prin intructiunea while.
+
+	7.TCel* NewCel(char *s1, char *s2, char c1, char c2, char dir);
+Aloca o noua celula de lista si actualizeaza campurile conform parametrilor primiti.
+
+		tema1.c
+	Contine instructiunea main. Se deschid fisierele si se realizeaza citirea datelor.
+Prima data citesc inputul in variabila word si aloc graful pentru tranzitii. Apoi citesc numarul de stari si starile corespunzatoare si le inserez in graf, folosind functia InitiateGraph. In continuare, citesc numarul de stari finale si actualizez campul finalState pentru starile corespunzatoare din vectorul de liste. Apoi retin starea intiala in variabila InitialState si citesc numarul de tranzitii, respectiv tranzitiile propriu-zise. Actualizez graful pe masura ce citesc o tranzitie: caut intrarea corespunzatoare starii curente din graf si parcurg lista acesteia pana la final, retinand celula dupa care voi realiza inserarea. Apoi construiesc o noua celula folosind functia NewCel si realizez inserarea prin actualizarea legaturii. La final intializez banda si capul de citire, care pointeaza catre primul caracter din banda. Apelez functia de RunTape (care primeste drept parametrii banda, capul de citire, starea initiala si graful) ce simuleaza masina. Verific rezulatul (0 sau 1) si realizez afisarile corespunzatoare.
+
+			
+			Task 2:
+
+		addition.tm
+
+	Am implementat urmatorul algoritm: iau cate o cifra din primul numar si o adun cu cifra de pe pozitia corespunzatoare din al doilea numar, pe care o supra-scriu cu x (daca rezultatul adunarii este 0) sau cu y (daca rezultatul este 1). Am supra-scris bitii cu x si y pentru a putea delimita rezultatul de restul bitilor care au ramas din al doilea numar si care trebuie inca adunati. Astfel:
+
+	In starea intiiala citesc un caracter din primul numar, il inlocui cu #, apoi las numarul nemodificat pana ajung la al doilea numar, sarind peste eventualele valori de x si y intiale, deci caut primul bit pe 0 sau pe 1 din al doilea numar, bit pe care il voi suprascrie corespunzator (cu x si sau y in functie de ce biti am adunat). Apoi, daca nu sunt in cazul special, cand se genereaza transport de la operatia de 1+1, mut capul de citire la stanga si las tot ce citesc nemodificat pana ma intorc inapoi la primul numar (deci pana ajung in starea intiala), unde se reia procesul. 
+	Daca trebuie sa adun 1 cu 1 procedez astfel: parcurg in continuare al doilea numar si schimb toti bitii de 1 in 0 (1 + 1 = 0) pana ajung la primul bit pe 0, pe care il transform in 1, apoi ma opresc (transportul se genereaza doar pana in acest punct). Daca ajung la # inseamna ca nu am gasit niciun 0, deci voi scrie un 1 in plus la finalulu numarului pentru a avea rezultatul corect. Dupa aceasta ma voi intoarce la primul numar, lasand tot ce citesc pe parcurs nemodificat.
+	Daca o data ce am reajuns in starea initiala citesc x sau y, inseamna ca am terminat de parcurs bitii din primul numar, deci am doua posibilitati: numarul al doilea a fost mai lung sau numerele au fost egale si s-a terminat adunarea. In ambele cazuri parcurg numarul al doilea si sa schimb valorile de x si y in 0, respectiv 1.
+	Daca numerele au fost egale, inseamna ca, dupa ce am rescirs rezultatul, trec in starea finala si executia ia sfarsit.
+	In cazul in care al doilea numar este mare ajung de asemenea in starea finala, deoarece, suprascriind al doilea numar cu rezultatul adunarii, orice bit in plus din al doilea numar se afla deja pe banda sub forma de 0 sau 1 in continuarea rezultatului(nu a fost transformat in x sau y, decat eventual modificat la adunarea 1 + 1).
+	Daca primul numar este mai mare => pe banda voi avea cifrele ramase din primul numar + codificarea rezultatului, pana in acel moment, in x si y, in locul celui de-al doilea numar. Asta inseamna ca trebuie sa citesc bitii suplimentari din primul numar si sa ii scriu in continuarea rezultatului (tot folosind codificarea cu x si y, pentru a stii ca nu am ajuns la rezultatu final). In final, cand toti bitii suplimentari din primul numar au fost copiati la sfarsitul rezultatului,voi ajunge tot in cazul in care din starea intiala se citeste x sau y si voi rescrie corespunzator codificarea pentru a obtine rezultatul final.
+ 
